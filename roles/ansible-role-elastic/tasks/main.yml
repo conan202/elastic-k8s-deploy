@@ -1,0 +1,55 @@
+---
+- name: Test if exist alias line
+  shell: grep -c "^alias kubectl" ~/.bash_aliases || true
+  register: test_alias
+
+- name: alias k8s
+  shell: |   
+    echo "alias kubectl='microk8s kubectl'" >> ~/.bash_aliases
+    echo "alias k='kubectl'" >> ~/.bash_aliases
+  when: test_alias.stdout == "0"
+
+- name: Create the project directories
+  file:
+    path: '{{ item }}'
+    state: directory
+    mode: '0777'
+    owner: '{{ ansible_ssh_user }}'
+  loop:
+    - '{{ project_folder }}'
+  become: yes
+
+- name: Copy templates files
+  template:
+    src: "{{ item }}"
+    dest: "{{ project_folder }}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - OpenEBS-operator.yaml
+
+- name: install k8s
+  shell: |
+    timedatectl set-timezone America/Montevideo
+    apt-get update
+    apt-get upgrade -y
+    apt-get full-upgrade -y
+    snap install core
+    snap refresh core
+    snap install microk8s --classic
+    microk8s status --wait-ready
+    microk8s enable dns rbac
+    apt-get install open-iscsi
+    systemctl enable --now iscsid
+    systemctl start --now iscsid
+    modprobe iscsi_tcp    
+  register: debug
+  # args:
+  #   chdir: "{{pathbackup}}"
+- debug:
+    var: debug  
+- name: install OpenEBS
+  shell: |
+    microk8s kubectl apply -f OpenEBS-operator.yaml
+  args:
+    chdir: "{{project_folder}}"

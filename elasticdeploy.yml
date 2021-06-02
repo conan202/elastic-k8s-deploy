@@ -1,0 +1,11 @@
+---
+- name: Install ansible-role-elastic
+  hosts: "{{ target }}"
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install ansible-role-elastic
+      include_role:
+        name: '{{ item }}'
+      with_items:
+        - ansible-role-elastic
