@@ -4,10 +4,32 @@
   register: test_alias
 
 - name: alias k8s
-  shell: |   
-    echo "alias kubectl='microk8s kubectl'" >> ~/.bash_aliases
-    echo "alias k='kubectl'" >> ~/.bash_aliases
+  lineinfile:
+      path: ~/.bash_aliases
+      line: |
+        alias kubectl='microk8s kubectl'
+        alias k='kubectl'
   when: test_alias.stdout == "0"
+
+- name: Test if exist function mayactl
+  shell: grep -c "^function mayactl {" ~/.bashrc || true
+  register: test_mayactl
+
+- name: add function mayactl
+  lineinfile:
+      path: ~/.bashrc
+      line: |
+        # Permite acceder de forma dínamica a la utilidad `mayactl` dentro del
+        # pod `maya-apiserver`.
+        #
+        # @example
+        # mayactl list volumes
+        function mayactl {
+          apiserver=`microk8s kubectl get pod -n openebs | grep -i api | awk '{print $1}'`
+
+          microk8s kubectl -n openebs exec $apiserver -- /usr/local/bin/mayactl $@
+        }
+  when: test_mayactl.stdout == "0"
 
 - name: Create the project directories
   file:
