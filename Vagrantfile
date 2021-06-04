@@ -18,19 +18,33 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     config.vm.box_check_update = false
 	
-#=======================================================
+# =======================================================
 # Configuración master 1
-#=======================================================
+# =======================================================
     config.vm.define "master1" do |node|
 		node.vm.network "private_network", ip: "192.168.50.11"
 		node.vm.hostname = "master1"
 		
-#usar alguna llave publica personal para logearse rapido a la vm, sino la clave es vagrant/vagrant
+        #usar alguna llave publica personal para logearse rapido a la vm, sino la clave es vagrant/vagrant
 		config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/ssh-key.pub"
 		config.vm.provision "shell", inline: <<-SHELL
 			cat /home/vagrant/.ssh/ssh-key.pub >> /home/vagrant/.ssh/authorized_keys
 		SHELL
 	end
+#=======================================================
+# Configuración node 1
+#=======================================================
+	config.vm.define "node1" do |node|
+		node.vm.network "private_network", ip: "192.168.50.21"
+		node.vm.hostname = "node1"
+		
+		config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/ssh-key.pub"
+		config.vm.provision "shell", inline: <<-SHELL
+			cat /home/vagrant/.ssh/ssh-key.pub >> /home/vagrant/.ssh/authorized_keys
+		SHELL
+	end    
+    
+    
 # #=======================================================
 # # Configuración master 2
 # #=======================================================
@@ -55,18 +69,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 # 			cat /home/vagrant/.ssh/ssh-key.pub >> /home/vagrant/.ssh/authorized_keys
 # 		SHELL
 # 	end
-# #=======================================================
-# # Configuración node 1
-# #=======================================================
-# 	config.vm.define "node1" do |node|
-# 		node.vm.network "private_network", ip: "192.168.50.21"
-# 		node.vm.hostname = "node1"
-		
-# 		config.vm.provision "file", source: "./password.pub", destination: "~/.ssh/ssh-key.pub"
-# 		config.vm.provision "shell", inline: <<-SHELL
-# 			cat /home/vagrant/.ssh/ssh-key.pub >> /home/vagrant/.ssh/authorized_keys
-# 		SHELL
-# 	end
+
 # #=======================================================
 # # Configuración node 2
 # #=======================================================
