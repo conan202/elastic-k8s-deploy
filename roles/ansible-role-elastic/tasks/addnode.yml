@@ -1,0 +1,13 @@
+---
+- name: find key to add
+  shell: microk8s add-node
+  register: salida
+- debug: 
+    var: salida.stdout
+- name: parseo salida contraseña
+  set_fact:
+    clavek8s: |
+      {{ salida.stdout | regex_search('microk8s join {{ansible_ssh_host}}:(.+)','\1')}}
+
+- debug:
+    msg: "{{clavek8s}}'^microk8s join {{ansible_ssh_host}}:(.+)\n'" 

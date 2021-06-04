@@ -1,6 +1,6 @@
 ---
 - name: Install ansible-role-elastic
-  hosts: "{{ target }}"
+  hosts: conatel #"{{ target }}"
   become: true
   gather_facts: false
   tasks:
@@ -9,3 +9,12 @@
         name: '{{ item }}'
       with_items:
         - ansible-role-elastic
+
+# - name: Install ansible-role-elastic
+#   hosts: controlador #"{{ target }}"
+#   become: true
+#   gather_facts: false
+#   tasks:
+#     - import_role:
+#         name: ansible-role-elastic
+#         tasks_from: addnode 
